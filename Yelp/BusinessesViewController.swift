@@ -135,20 +135,14 @@ class BusinessesViewController: UIViewController,UITableViewDataSource,UITableVi
     public func loadMoreData(){
         offset += 5
         Business.searchWithTerm(term: "", offset: offset, completion: { (businesses: [Business]?, error: Error?) -> Void in
-            self.businesses = businesses
-            self.filteredBusinesses = businesses
+            self.businesses.append(contentsOf: businesses!)
+            self.filteredBusinesses.append(contentsOf: businesses!)
             //update flag
             self.isMoreData = false
             //stop infinite scroll animation
             self.loadingMoreView?.stopAnimating()
             
             self.tabelView.reloadData()
-            if let businesses = businesses {
-                for business in businesses {
-                    print(business.name!)
-                    print(business.address!)
-                }
-            }
         }
         )
     }
