@@ -8,12 +8,14 @@
 
 import UIKit
 
-class BusinessesViewController: UIViewController,UITableViewDataSource,UITableViewDelegate, UISearchBarDelegate {
+class BusinessesViewController: UIViewController,UITableViewDataSource,UITableViewDelegate, UISearchBarDelegate, UIScrollViewDelegate {
     
     var businesses: [Business]!
     @IBOutlet weak var tabelView: UITableView!
     var searchBar : UISearchBar?
     var filteredBusinesses : [Business]!
+    var isMoreData = false
+    var loadingMoreView : InfiniteScrollActivityView?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,24 +24,22 @@ class BusinessesViewController: UIViewController,UITableViewDataSource,UITableVi
         tabelView.rowHeight = UITableViewAutomaticDimension
         tabelView.estimatedRowHeight = 120
         
+        // Set up Infinite Scroll loading indicator
+        let frame = CGRect(x: 0, y: tabelView.contentSize.height, width: tabelView.bounds.size.width, height: InfiniteScrollActivityView.defaultHeight)
+        loadingMoreView = InfiniteScrollActivityView(frame: frame)
+        loadingMoreView?.isHidden = true
+        tabelView.addSubview(loadingMoreView!)
+        
+        var inset = tabelView.contentInset
+        inset.bottom += InfiniteScrollActivityView.defaultHeight
+        tabelView.contentInset = inset
+        
         searchBar = UISearchBar()
         searchBar?.sizeToFit()
         navigationItem.titleView = searchBar
         searchBar?.delegate = self
         
-        Business.searchWithTerm(term: "Chinese", completion: { (businesses: [Business]?, error: Error?) -> Void in
-            self.businesses = businesses
-            self.filteredBusinesses = businesses
-            self.tabelView.reloadData()
-            if let businesses = businesses {
-                for business in businesses {
-                    print(business.name!)
-                    print(business.address!)
-                }
-            }
-            
-            }
-        )
+        loadData()
         
         //Example of Yelp search with more search options specified
 //         Business.searchWithTerm(term: "Restaurants", sort: .Distance, categories: ["asianfusion", "burgers"], deals: true) { (businesses: [Business]!, error: NSError!) -> Void in
@@ -95,6 +95,47 @@ class BusinessesViewController: UIViewController,UITableViewDataSource,UITableVi
         tabelView.reloadData()
     }
     
+    public func scrollViewDidScroll(_ scrollView: UIScrollView){
+        if(!isMoreData){
+            //totoal content in UIScrollView
+            let scrollViewContentHeight = tabelView.contentSize.height
+            //calculate the position of one screen length before the bottom of result
+            let scrollOffsetThreshold = scrollViewContentHeight - tabelView.bounds.size.height
+        
+            if(scrollView.contentOffset.y > scrollOffsetThreshold && tabelView.isDragging){
+                self.isMoreData = true
+                
+                //uodate position of loading more view indicator
+                let frame = CGRect(x: 0, y: tabelView.contentSize.height, width: tabelView.bounds.size.width, height: InfiniteScrollActivityView.defaultHeight)
+                loadingMoreView?.frame = frame
+                loadingMoreView?.startAnimating()
+                
+                //strart load mor data
+                loadData()
+            }
+        
+        }
+    }
+    
+    public func loadData(){
+        Business.searchWithTerm(term: "Chinese", completion: { (businesses: [Business]?, error: Error?) -> Void in
+            self.businesses = businesses
+            self.filteredBusinesses = businesses
+            //update flag
+            self.isMoreData = false
+            //stop infinite scroll animation
+            self.loadingMoreView?.stopAnimating()
+            
+            self.tabelView.reloadData()
+            if let businesses = businesses {
+                for business in businesses {
+                    print(business.name!)
+                    print(business.address!)
+                }
+            }
+        }
+        )
+    }
     /*
      // MARK: - Navigation
      
