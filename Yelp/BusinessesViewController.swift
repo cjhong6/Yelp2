@@ -16,6 +16,7 @@ class BusinessesViewController: UIViewController,UITableViewDataSource,UITableVi
     var filteredBusinesses : [Business]!
     var isMoreData = false
     var loadingMoreView : InfiniteScrollActivityView?
+    var offset = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,10 +37,23 @@ class BusinessesViewController: UIViewController,UITableViewDataSource,UITableVi
         
         searchBar = UISearchBar()
         searchBar?.sizeToFit()
+        searchBar?.backgroundColor = UIColor(red:0.83, green:0.00, blue:0.00, alpha:1.0)
         navigationItem.titleView = searchBar
         searchBar?.delegate = self
+        searchBar?.placeholder = "type resturant name"
         
-        loadData()
+        Business.searchWithTerm(term: "", offset: offset, completion: { (businesses: [Business]?, error: Error?) -> Void in
+            self.businesses = businesses
+            self.filteredBusinesses = businesses
+            self.tabelView.reloadData()
+            if let businesses = businesses {
+                for business in businesses {
+                    print(business.name!)
+                    print(business.address!)
+                }
+            }
+        }
+        )
         
         //Example of Yelp search with more search options specified
 //         Business.searchWithTerm(term: "Restaurants", sort: .Distance, categories: ["asianfusion", "burgers"], deals: true) { (businesses: [Business]!, error: NSError!) -> Void in
@@ -111,14 +125,15 @@ class BusinessesViewController: UIViewController,UITableViewDataSource,UITableVi
                 loadingMoreView?.startAnimating()
                 
                 //strart load mor data
-                loadData()
+                loadMoreData()
             }
         
         }
     }
     
-    public func loadData(){
-        Business.searchWithTerm(term: "Chinese", completion: { (businesses: [Business]?, error: Error?) -> Void in
+    public func loadMoreData(){
+        offset += 5
+        Business.searchWithTerm(term: "", offset: offset, completion: { (businesses: [Business]?, error: Error?) -> Void in
             self.businesses = businesses
             self.filteredBusinesses = businesses
             //update flag
