@@ -25,6 +25,8 @@ class BusinessesViewController: UIViewController,UITableViewDataSource,UITableVi
         tabelView.rowHeight = UITableViewAutomaticDimension
         tabelView.estimatedRowHeight = 120
         
+        self.navigationController?.navigationBar.barTintColor = UIColor(red:0.81, green:0.02, blue:0.02, alpha:1.0)
+
         // Set up Infinite Scroll loading indicator
         let frame = CGRect(x: 0, y: tabelView.contentSize.height, width: tabelView.bounds.size.width, height: InfiniteScrollActivityView.defaultHeight)
         loadingMoreView = InfiniteScrollActivityView(frame: frame)
@@ -37,7 +39,6 @@ class BusinessesViewController: UIViewController,UITableViewDataSource,UITableVi
         
         searchBar = UISearchBar()
         searchBar?.sizeToFit()
-        searchBar?.backgroundColor = UIColor(red:0.83, green:0.00, blue:0.00, alpha:1.0)
         navigationItem.titleView = searchBar
         searchBar?.delegate = self
         searchBar?.placeholder = "type resturant name"
