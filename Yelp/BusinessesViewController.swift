@@ -43,7 +43,7 @@ class BusinessesViewController: UIViewController,UITableViewDataSource,UITableVi
         searchBar?.delegate = self
         searchBar?.placeholder = "type resturant name"
         
-        Business.searchWithTerm(term: "", offset: offset, completion: { (businesses: [Business]?, error: Error?) -> Void in
+        Business.searchWithTerm(term: "chinese", offset: offset, completion: { (businesses: [Business]?, error: Error?) -> Void in
             self.businesses = businesses
             self.filteredBusinesses = businesses
             self.tabelView.reloadData()
@@ -134,7 +134,7 @@ class BusinessesViewController: UIViewController,UITableViewDataSource,UITableVi
     
     public func loadMoreData(){
         offset += 5
-        Business.searchWithTerm(term: "", offset: offset, completion: { (businesses: [Business]?, error: Error?) -> Void in
+        Business.searchWithTerm(term: "chinese", offset: offset, completion: { (businesses: [Business]?, error: Error?) -> Void in
             self.businesses.append(contentsOf: businesses!)
             self.filteredBusinesses.append(contentsOf: businesses!)
             //update flag
@@ -146,14 +146,19 @@ class BusinessesViewController: UIViewController,UITableViewDataSource,UITableVi
         }
         )
     }
-    /*
-     // MARK: - Navigation
-     
-     // In a storyboard-based application, you will often want to do a little preparation before navigation
-     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-     // Get the new view controller using segue.destinationViewController.
-     // Pass the selected object to the new view controller.
-     }
-     */
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let detailViewController = segue.destination as! BusinessesDetailViewController
+        let resturantName = (sender as! BusinessCell).nameLabel
+        let reviewCount = (sender as! BusinessCell).reviewsCountLabel
+        let thumbnail = (sender as! BusinessCell).thumbImageView
+        let address = (sender as! BusinessCell).addressLabel
+        detailViewController.navBarTitle.title = (resturantName?.text)! as String
+        detailViewController.address = (address?.text)! as String
+        detailViewController.review = (reviewCount?.text)! as String
+        detailViewController.name = (resturantName?.text)! as String
+        detailViewController.resturantImage = (thumbnail?.image)! as UIImage
+        
+    }
     
 }
